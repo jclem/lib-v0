@@ -1,0 +1,21 @@
+{
+  "name": "@jclem/lib",
+  "author": "Jonathan Clem <j@jclem.me> (https://www.jclem.me)",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.3"
+  },
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "check:build": "tsc --noEmit",
+    "check:format": "prettier --loglevel warn --check .",
+    "check:lint": "eslint ."
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
