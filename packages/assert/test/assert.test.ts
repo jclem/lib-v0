@@ -1,5 +1,5 @@
 import {describe, expect, test} from '@jest/globals'
-import {assert, assertString} from '../src/assert'
+import {assert, assertInstance, assertString} from '../src/assert'
 
 describe('assert', () => {
   test('passes with a value', () => {
@@ -38,5 +38,21 @@ describe('assertString', () => {
 
   test('accepts a custom message', () => {
     expect(() => assertString(1, 'Given 1')).toThrow('Given 1')
+  })
+})
+
+describe('assertInstance', () => {
+  test('passes with an instance', () => {
+    class Foo {}
+    const foo = new Foo()
+    expect(assertInstance(foo, Foo)).toBe(foo)
+  })
+
+  test('raises with a non-instance', () => {
+    class Foo {}
+    const foo = {}
+    expect(() => assertInstance(foo, Foo)).toThrow(
+      'Expected a Foo, but got [object Object]'
+    )
   })
 })
