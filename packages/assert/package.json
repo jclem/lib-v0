@@ -1,7 +1,7 @@
 {
   "name": "@jclem/assert",
   "description": "A collection of commonly-used assertion functions",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Jonathan Clem <j@jclem.me> (https://www.jclem.me)",
   "bugs": "https://github.com/jclem/lib/issues",
   "type": "module",
@@ -12,6 +12,13 @@
       "require": "./dist/cjs/assert.js"
     }
   },
+  "files": [
+    "src/*",
+    "dist/*",
+    "README.md",
+    "LICENSE.md",
+    "package.json"
+  ],
   "devDependencies": {
     "@jest/globals": "^29.0.3",
     "@swc/core": "^1.3.1",
@@ -37,7 +44,7 @@
     "directory": "packages/assert"
   },
   "scripts": {
-    "build": "if [ -d dist ]; then rm -r dist; fi && konk run c -gL -n'build:*'",
+    "build": "if [ -d dist ]; then rm -r dist; fi && cp ../../LICENSE.md . && konk run c -gL -n'build:*'",
     "build:esm": "tsc -p tsconfig.json",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "check": "konk run c -cgL -n 'check:*'",
