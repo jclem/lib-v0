@@ -1,7 +1,7 @@
 {
   "name": "@jclem/assert",
   "description": "A collection of commonly-used assertion functions",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Jonathan Clem <j@jclem.me> (https://www.jclem.me)",
   "bugs": "https://github.com/jclem/lib/issues",
   "type": "module",
