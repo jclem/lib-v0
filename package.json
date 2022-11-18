@@ -23,7 +23,8 @@
     "check:build": "tsc --noEmit",
     "check:format": "prettier --loglevel warn --check .",
     "check:lint": "eslint .",
-    "test": "lerna run test"
+    "test": "lerna run test",
+    "publish": "lerna run build && lerna publish"
   },
   "workspaces": [
     "packages/*"

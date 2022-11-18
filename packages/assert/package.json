@@ -56,7 +56,6 @@
     "check:lint": "eslint .",
     "fix": "konk run s -cL -n 'fix:*'",
     "fix:format": "prettier --list-different --write .",
-    "test": "jest",
-    "prepublish": "npm run build"
+    "test": "jest"
   }
 }
