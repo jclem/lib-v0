@@ -5,10 +5,10 @@
  * @param message An error message thrown when `value` is null or undefined
  * @returns The non-null-non-undefined value
  */
-export const assert = <T>(
+export function assert<T>(
   value: T | undefined | null,
   message = `Expected value, but got none`
-): T => {
+): T {
   if (value == null) {
     throw new Error(message)
   }
@@ -23,10 +23,10 @@ export const assert = <T>(
  * @param message An error message thrown when `value` is not a string
  * @returns A string
  */
-export const assertString = (
+export function assertString(
   value: unknown,
   message = `Expected a string, but got ${value}`
-): string => {
+): string {
   return assertType(value, 'string', message)
 }
 
@@ -50,11 +50,11 @@ type TypeofMap = {
  * @param message An error message thrown when `value` is not of type `type`
  * @returns The value, of type `type`
  */
-export const assertType = <K extends keyof TypeofMap>(
+export function assertType<K extends keyof TypeofMap>(
   value: unknown,
   type: K,
   message = `Expected a ${type}, but got ${value}`
-): TypeofMap[K] => {
+): TypeofMap[K] {
   if (typeof value === type) {
     return value as TypeofMap[K]
   }
@@ -71,11 +71,11 @@ export const assertType = <K extends keyof TypeofMap>(
  * @returns A string
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const assertInstance = <T extends abstract new (...args: any) => any>(
+export function assertInstance<T extends abstract new (...args: any) => any>(
   value: unknown,
   type: T,
   message = `Expected a ${type.name}, but got ${value}`
-): InstanceType<T> => {
+): InstanceType<T> {
   if (value instanceof type) {
     return value
   }

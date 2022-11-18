@@ -21,12 +21,7 @@ value that may be successful (containing the return value of the operation) or
 an error (containing the error itself).
 
 ```typescript
-import {
-  resultOk,
-  resultErr,
-  unwrap,
-  unwrapErr
-} from '@jclem/result'
+import {resultOk, resultErr, unwrap, unwrapErr} from '@jclem/result'
 
 // Create a successful result with a value.
 const ok = resultOk('Hello')
@@ -64,17 +59,14 @@ another if it is not. The `either` function allows you to do this
 (alternatively, one can use an if/else block, as seen above).
 
 ```typescript
-import {
-  Result,
-  either
-} from '@jclem/result'
+import {Result, either} from '@jclem/result'
 
 declare const myResult: Result<string, Error> // Either contains a string or an error
 
 either(
   myResult,
-  (value) => console.log('Success:', value),
-  (error) => console.error('Error:', error)
+  value => console.log('Success:', value),
+  error => console.error('Error:', error)
 )
 ```
 
@@ -104,10 +96,7 @@ const myNewResult = map(
 The package can work with asynchronous values, as well.
 
 ```typescript
-import {
-  Result,
-  fromPromise
-} from '@jclem/result'
+import {Result, fromPromise} from '@jclem/result'
 
 declare const myPromise: Promise<string>
 const myPromiseResult = fromPromise(myPromise)
@@ -130,8 +119,8 @@ import {
 declare const myPromise: Promise<string>
 const myNewPromise = mapAsync(
   fromPromise(myPromise),
-  (value) => value.toUpperCase(),
-  (error) => null
+  value => value.toUpperCase(),
+  error => null
 )
 // myNewPromise is now a Promise<Result<string, null>>
 // Note that the map functions can also be asynchronous, if need be.
@@ -139,8 +128,8 @@ const myNewPromise = mapAsync(
 // There is a convenience function to do this with a promise directly
 const myNewPromise2 = mapPromise(
   myPromise,
-  (value) => value.toUpperCase(),
-  (error) => null
+  value => value.toUpperCase(),
+  error => null
 )
 
 // There is also a convenience function simply to await the result value or

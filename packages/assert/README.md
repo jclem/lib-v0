@@ -11,18 +11,13 @@ npm install @jclem/assert
 
 ## Usage
 
-This package works by making assertions about a value, and then *returning* the
+This package works by making assertions about a value, and then _returning_ the
 value. This means that it works differently from other type assertions in
 TypeScript such as `asserts value is Type` or `value is Type`. In order to make
 use of the type-constrained value, you must use the returned value.
 
 ```typescript
-import {
-  assert,
-  assertString,
-  assertType,
-  assertInstance
-} from "@jclem/assert";
+import {assert, assertString, assertType, assertInstance} from '@jclem/assert'
 
 class Foo {
   name = 'foo'

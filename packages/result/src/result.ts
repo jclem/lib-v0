@@ -13,7 +13,9 @@ export type ResultError<E> = {ok: false; error: E}
  * @param value The value to wrap in an OK result
  * @returns The value wrapped in a {@link ResultOk}
  */
-export const resultOk = <T>(value: T): ResultOk<T> => ({ok: true, value})
+export function resultOk<T>(value: T): ResultOk<T> {
+  return {ok: true, value}
+}
 
 /**
  * Wrap the given value in a {@link ResultError}.
@@ -21,7 +23,9 @@ export const resultOk = <T>(value: T): ResultOk<T> => ({ok: true, value})
  * @param error The error to wrap in a not OK result
  * @returns The value wrapped in a {@link ResultError}
  */
-export const resultErr = <E>(error: E): ResultError<E> => ({ok: false, error})
+export function resultErr<E>(error: E): ResultError<E> {
+  return {ok: false, error}
+}
 
 /**
  * Unwrap a {@link Result}'s value or throw its error.
@@ -29,7 +33,7 @@ export const resultErr = <E>(error: E): ResultError<E> => ({ok: false, error})
  * @param result A result to unwrap the value of
  * @returns The value of the result
  */
-export const unwrap = <T>(result: Result<T, unknown>): T => {
+export function unwrap<T>(result: Result<T, unknown>): T {
   if (result.ok) {
     return result.value
   }
@@ -43,7 +47,7 @@ export const unwrap = <T>(result: Result<T, unknown>): T => {
  * @param result A result to unwrap the error of
  * @returns The error of the result
  */
-export const unwrapErr = <E>(result: Result<unknown, E>): E => {
+export function unwrapErr<E>(result: Result<unknown, E>): E {
   if (!result.ok) {
     return result.error
   }
@@ -57,9 +61,11 @@ export const unwrapErr = <E>(result: Result<unknown, E>): E => {
  * @param promise A promise that may resolve to a value or reject with an error
  * @returns A promise that resolves to a {@link Result} wrapping the original promise's value or error
  */
-export const fromPromise = <T>(
+export function fromPromise<T>(
   promise: Promise<T>
-): Promise<Result<T, unknown>> => promise.then(resultOk).catch(resultErr)
+): Promise<Result<T, unknown>> {
+  return promise.then(resultOk).catch(resultErr)
+}
 
 /**
  * Run `onOk` if the given {@link Result} is an {@link ResultOk}, or `onError`
@@ -69,11 +75,11 @@ export const fromPromise = <T>(
  * @param onOk The function to call when the result is OK
  * @param onError The function to call when the result is not OK
  */
-export const either = <T, E>(
+export function either<T, E>(
   result: Result<T, E>,
   onOk: (value: T) => unknown,
   onError: (error: E) => unknown
-): void => {
+): void {
   if (result.ok) {
     onOk(result.value)
   } else {
@@ -90,11 +96,11 @@ export const either = <T, E>(
  * @param onError The function to map the error through when the result is not OK
  * @returns A new {@link Result} wrapping the mapped value and error type
  */
-export const map = <T, E, R, RE>(
+export function map<T, E, R, RE>(
   result: Result<T, E>,
   onOk: (value: T) => R,
   onError: (error: E) => RE
-): Result<R, RE> => {
+): Result<R, RE> {
   if (result.ok) {
     return resultOk(onOk(result.value))
   } else {
@@ -112,13 +118,13 @@ export const map = <T, E, R, RE>(
  * @param onError The optionally async function to map the error through when the result is not OK
  * @returns A promise resolving to a new {@link Result} wrapping the mapped value and error type
  */
-export const mapAsync = async <T, E, R, RE>(
+export async function mapAsync<T, E, R, RE>(
   result:
     | Promise<Result<T | Promise<T>, E | Promise<E>>>
     | Result<T | Promise<T>, E | Promise<E>>,
   onOk: (value: T) => R,
   onError: (error: E) => RE
-): Promise<Result<R, RE>> => {
+): Promise<Result<R, RE>> {
   const awaitedResult = await result
 
   if (awaitedResult.ok) {
@@ -136,11 +142,13 @@ export const mapAsync = async <T, E, R, RE>(
  * @param onError The function to map the error through when the promise rejects
  * @returns A {@link Promise} resolving to a result wrapping the value and error type
  */
-export const mapPromise = async <T, T2, E2>(
+export async function mapPromise<T, T2, E2>(
   promise: Promise<T>,
   onOk: (value: T) => T2,
   onError: (error: unknown) => E2
-): Promise<Result<T2, E2>> => mapAsync(fromPromise(promise), onOk, onError)
+): Promise<Result<T2, E2>> {
+  return mapAsync(fromPromise(promise), onOk, onError)
+}
 
 /**
  * Map a result whose values are possibly promises by awaiting those promises.
@@ -148,11 +156,11 @@ export const mapPromise = async <T, T2, E2>(
  * @param result The result to map through an await
  * @returns A new result, with promises awaited
  */
-export const mapAwait = async <T, E>(
+export async function mapAwait<T, E>(
   result:
     | Promise<Result<T | Promise<T>, E | Promise<E>>>
     | Result<T | Promise<T>, E | Promise<E>>
-): Promise<Result<T, E>> => {
+): Promise<Result<T, E>> {
   const awaitedResult = await result
 
   if (awaitedResult.ok) {

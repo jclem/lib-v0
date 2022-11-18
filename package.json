@@ -20,9 +20,7 @@
   "private": true,
   "scripts": {
     "build": "lerna run build",
-    "check:build": "tsc --noEmit",
-    "check:format": "prettier --loglevel warn --check .",
-    "check:lint": "eslint .",
+    "check": "lerna run check",
     "test": "lerna run test",
     "publish": "lerna run build && lerna publish"
   },
