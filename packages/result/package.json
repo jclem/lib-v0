@@ -1,7 +1,7 @@
 {
   "name": "@jclem/result",
   "description": "Functions for working with result types",
-  "version": "0.2.2",
+  "version": "1.0.0",
   "author": "Jonathan Clem <j@jclem.me> (https://www.jclem.me)",
   "bugs": "https://github.com/jclem/lib/issues",
   "type": "module",
