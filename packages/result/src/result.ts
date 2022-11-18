@@ -21,7 +21,7 @@ export const resultOk = <T>(value: T): ResultOk<T> => ({ok: true, value})
  * @param error The error to wrap in a not OK result
  * @returns The value wrapped in a {@link ResultError}
  */
-export const resultError = <E>(error: E): ResultError<E> => ({ok: false, error})
+export const resultErr = <E>(error: E): ResultError<E> => ({ok: false, error})
 
 /**
  * Unwrap a {@link Result}'s value or throw its error.
@@ -43,7 +43,7 @@ export const unwrap = <T>(result: Result<T, unknown>): T => {
  * @param result A result to unwrap the error of
  * @returns The error of the result
  */
-export const unwrapError = <E>(result: Result<unknown, E>): E => {
+export const unwrapErr = <E>(result: Result<unknown, E>): E => {
   if (!result.ok) {
     return result.error
   }
@@ -59,7 +59,7 @@ export const unwrapError = <E>(result: Result<unknown, E>): E => {
  */
 export const fromPromise = <T>(
   promise: Promise<T>
-): Promise<Result<T, unknown>> => promise.then(resultOk).catch(resultError)
+): Promise<Result<T, unknown>> => promise.then(resultOk).catch(resultErr)
 
 /**
  * Run `onOk` if the given {@link Result} is an {@link ResultOk}, or `onError`
@@ -98,7 +98,7 @@ export const map = <T, E, R, RE>(
   if (result.ok) {
     return resultOk(onOk(result.value))
   } else {
-    return resultError(onError(result.error))
+    return resultErr(onError(result.error))
   }
 }
 
@@ -124,7 +124,7 @@ export const mapAsync = async <T, E, R, RE>(
   if (awaitedResult.ok) {
     return resultOk(await onOk(await awaitedResult.value))
   } else {
-    return resultError(await onError(await awaitedResult.error))
+    return resultErr(await onError(await awaitedResult.error))
   }
 }
 
@@ -158,6 +158,6 @@ export const mapAwait = async <T, E>(
   if (awaitedResult.ok) {
     return resultOk(await awaitedResult.value)
   } else {
-    return resultError(await awaitedResult.error)
+    return resultErr(await awaitedResult.error)
   }
 }

@@ -6,10 +6,10 @@ import {
   mapAsync,
   mapAwait,
   mapPromise,
-  resultError,
+  resultErr,
   resultOk,
   unwrap,
-  unwrapError
+  unwrapErr
 } from '../src/result'
 
 describe('resultOk', () => {
@@ -18,9 +18,9 @@ describe('resultOk', () => {
   })
 })
 
-describe('resultError', () => {
+describe('resultErr', () => {
   test('creates an error result', () => {
-    expect(resultError(true).error).toBe(true)
+    expect(resultErr(true).error).toBe(true)
   })
 })
 
@@ -30,9 +30,7 @@ describe('fromPromise', () => {
   })
 
   test('creates an error result from a rejected promise', () => {
-    expect(fromPromise(Promise.reject(true))).resolves.toEqual(
-      resultError(true)
-    )
+    expect(fromPromise(Promise.reject(true))).resolves.toEqual(resultErr(true))
   })
 })
 
@@ -51,7 +49,7 @@ describe('either', () => {
     expect.assertions(1)
 
     either(
-      resultError(true),
+      resultErr(true),
       () => null,
       value => expect(value).toBe(true)
     )
@@ -65,18 +63,18 @@ describe('unwrap', () => {
 
   test('throws the error when not OK', () => {
     const err = new Error('oops')
-    expect(() => unwrap(resultError(err))).toThrow(err)
+    expect(() => unwrap(resultErr(err))).toThrow(err)
   })
 })
 
-describe('unwrapError', () => {
+describe('unwrapErr', () => {
   test('returns the error when not OK', () => {
     const err = new Error('oops')
-    expect(unwrapError(resultError(err))).toBe(err)
+    expect(unwrapErr(resultErr(err))).toBe(err)
   })
 
   test('throws an error when OK', () => {
-    expect(() => unwrapError(resultOk(true))).toThrow(
+    expect(() => unwrapErr(resultOk(true))).toThrow(
       'Expected error, but got true'
     )
   })
@@ -96,11 +94,11 @@ describe('map', () => {
   test('maps an error result', () => {
     expect(
       map(
-        resultError(true),
+        resultErr(true),
         () => null,
         value => !value
       )
-    ).toEqual(resultError(false))
+    ).toEqual(resultErr(false))
   })
 })
 
@@ -128,11 +126,11 @@ describe('mapAsync', () => {
   test('maps an error result', async () => {
     expect(
       await mapAsync(
-        resultError(true),
+        resultErr(true),
         () => null,
         value => Promise.resolve(!value)
       )
-    ).toEqual(resultError(false))
+    ).toEqual(resultErr(false))
   })
 })
 
@@ -154,7 +152,7 @@ describe('mapPromise', () => {
         () => null,
         value => !value
       )
-    ).toEqual(resultError(false))
+    ).toEqual(resultErr(false))
   })
 })
 
@@ -166,8 +164,8 @@ describe('mapAwait', () => {
   })
 
   test('maps a rejected result', async () => {
-    expect(await mapAwait(resultError(Promise.resolve(true)))).toEqual(
-      resultError(true)
+    expect(await mapAwait(resultErr(Promise.resolve(true)))).toEqual(
+      resultErr(true)
     )
   })
 })
