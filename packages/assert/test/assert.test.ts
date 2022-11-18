@@ -1,5 +1,5 @@
 import {describe, expect, test} from '@jest/globals'
-import {assert, assertInstance, assertString} from '../src/assert'
+import {assert, assertInstance, assertString, assertType} from '../src/assert'
 
 describe('assert', () => {
   test('passes with a value', () => {
@@ -38,6 +38,18 @@ describe('assertString', () => {
 
   test('accepts a custom message', () => {
     expect(() => assertString(1, 'Given 1')).toThrow('Given 1')
+  })
+})
+
+describe('assertType', () => {
+  test('passes with a passing type', () => {
+    expect(assertType(1n, 'bigint')).toBe(1n)
+  })
+
+  test('raises with a non-type', () => {
+    expect(() => assertType(1, 'string')).toThrow(
+      'Expected a string, but got 1'
+    )
   })
 })
 

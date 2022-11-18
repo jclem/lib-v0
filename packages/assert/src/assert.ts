@@ -27,15 +27,43 @@ export const assertString = (
   value: unknown,
   message = `Expected a string, but got ${value}`
 ): string => {
-  if (typeof value !== 'string') {
-    throw new Error(message)
-  }
+  return assertType(value, 'string', message)
+}
 
-  return value
+type TypeofMap = {
+  string: string
+  number: number
+  bigint: bigint
+  boolean: boolean
+  symbol: symbol
+  undefined: undefined
+  object: object | null
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  function: Function
 }
 
 /**
- * Assert that `value` is an instance of `type`.
+ * Assert that `value` is of type `type` and return it.
+ *
+ * @param value The value to assert on, of unknown type
+ * @param type The type to assert on, as a string, such as "string" or "number"
+ * @param message An error message thrown when `value` is not of type `type`
+ * @returns The value, of type `type`
+ */
+export const assertType = <K extends keyof TypeofMap>(
+  value: unknown,
+  type: K,
+  message = `Expected a ${type}, but got ${value}`
+): TypeofMap[K] => {
+  if (typeof value === type) {
+    return value as TypeofMap[K]
+  }
+
+  throw new Error(message)
+}
+
+/**
+ * Assert that `value` is an instance of `type` and return it.
  *
  * @param value The value to assert on, of unknown type
  * @param type The type to assert `value` is an instance of
