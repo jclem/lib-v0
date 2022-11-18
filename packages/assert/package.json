@@ -44,6 +44,9 @@
     "url": "https://github.com/jclem/lib.git",
     "directory": "packages/assert"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "if [ -d dist ]; then rm -r dist; fi && cp ../../LICENSE.md . && konk run c -gL -n'build:*'",
     "build:esm": "tsc -p tsconfig.json",
