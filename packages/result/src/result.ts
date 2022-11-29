@@ -10,6 +10,13 @@ export type ResultError<E> = {ok: false; error: E}
 /**
  * Wrap the given value in a {@link ResultOk}.
  *
+ * @example
+ * ```ts
+ * const result = resultOk(42)
+ * console.log(result.ok)    // true
+ * console.log(result.value) // 42
+ * ```
+ *
  * @param value The value to wrap in an OK result
  * @returns The value wrapped in a {@link ResultOk}
  */
@@ -20,6 +27,13 @@ export function resultOk<T>(value: T): ResultOk<T> {
 /**
  * Wrap the given value in a {@link ResultError}.
  *
+ * @example
+ * ```ts
+ * const result = resultErr(new Error('Boom'))
+ * console.log(result.ok)     // false
+ * console.log(result.error)  // Error: Boom
+ * ```
+ *
  * @param error The error to wrap in a not OK result
  * @returns The value wrapped in a {@link ResultError}
  */
@@ -29,6 +43,18 @@ export function resultErr<E>(error: E): ResultError<E> {
 
 /**
  * Unwrap a {@link Result}'s value or throw its error.
+ *
+ * @example
+ * ```ts
+ * const result = resultOk(42)
+ * console.log(unwrap(result)) // 42
+ * ```
+ *
+ * @example
+ * ```ts
+ * const result = resultErr(new Error('Boom'))
+ * console.log(unwrap(result)) // throws Error: Boom
+ * ```
  *
  * @param result A result to unwrap the value of
  * @returns The value of the result
@@ -44,6 +70,18 @@ export function unwrap<T>(result: Result<T, unknown>): T {
 /**
  * Unwrap a {@link Result}'s error or throw an error.
  *
+ * @example
+ * ```ts
+ * const result = resultErr(new Error('Boom'))
+ * console.log(unwrapErr(result)) // Error: Boom
+ * ```
+ *
+ * @example
+ * ```ts
+ * const result = resultOk(42)
+ * console.log(unwrapErr(result)) // throws Error: Expected error, but got 42
+ * ```
+ *
  * @param result A result to unwrap the error of
  * @returns The error of the result
  */
@@ -58,6 +96,13 @@ export function unwrapErr<E>(result: Result<unknown, E>): E {
 /**
  * Create a {@link Result} from a {@link Promise}.
  *
+ * @example
+ * ```ts
+ * const result = fromPromise(Promise.resolve(42))
+ * console.log(result.ok)    // true
+ * console.log(result.value) // 42
+ * ```
+ *
  * @param promise A promise that may resolve to a value or reject with an error
  * @returns A promise that resolves to a {@link Result} wrapping the original promise's value or error
  */
@@ -71,6 +116,14 @@ export function fromPromise<T>(
  * Run `onOk` if the given {@link Result} is an {@link ResultOk}, or `onError`
  * if it is a {@link ResultError}.
  *
+ * @example
+ * ```ts
+ * const result = resultOk(42)
+ * const result2 = resultErr(new Error('Boom'))
+ * console.log(either(result, value => value + 1, error => error.message))  // 43
+ * console.log(either(result2, value => value + 1, error => error.message)) // Boom
+ * ```
+ *
  * @param result The result to unwrap
  * @param onOk The function to call when the result is OK
  * @param onError The function to call when the result is not OK
@@ -80,16 +133,20 @@ export function either<T, E>(
   onOk: (value: T) => unknown,
   onError: (error: E) => unknown
 ): void {
-  if (result.ok) {
-    onOk(result.value)
-  } else {
-    onError(result.error)
-  }
+  map(result, onOk, onError)
 }
 
 /**
  * Map a {@link Result} to a new {@link Result} by applying the OK or error
  * function to the value or error, respectively.
+ *
+ * @example
+ * ```ts
+ * const result = resultOk(42)
+ * const result2 = resultErr(new Error('Boom'))
+ * console.log(map(result, value => value + 1, error => error.message))  // {ok: true, value: 43}
+ * console.log(map(result2, value => value + 1, error => error.message)) // {ok: false, error: 'Boom'}
+ * ```
  *
  * @param result The result to map
  * @param onOk The function to map the value through when the result is OK
@@ -113,6 +170,14 @@ export function map<T, E, R, RE>(
  * {@link Result} by applying the optionally async OK or error function to the
  * value or error, respectively.
  *
+ * @example
+ * ```ts
+ * const result = resultOk(42)
+ * const result2 = resultErr(new Error('Boom'))
+ * console.log(mapAsync(result, value => Promise.resolve(value + 1), error => Promise.resolve(error.message)))  // {ok: true, value: 43}
+ * console.log(mapAsync(result2, value => Promise.resolve(value + 1), error => Promise.resolve(error.message))) // {ok: false, error: 'Boom'}
+ * ```
+ *
  * @param result The result to map
  * @param onOk The optionally async function to map the value through when the result is OK
  * @param onError The optionally async function to map the error through when the result is not OK
@@ -124,7 +189,7 @@ export async function mapAsync<T, E, R, RE>(
     | Result<T | Promise<T>, E | Promise<E>>,
   onOk: (value: T) => R,
   onError: (error: E) => RE
-): Promise<Result<R, RE>> {
+): Promise<Result<Awaited<R>, Awaited<RE>>> {
   const awaitedResult = await result
 
   if (awaitedResult.ok) {
@@ -146,7 +211,7 @@ export async function mapPromise<T, T2, E2>(
   promise: Promise<T>,
   onOk: (value: T) => T2,
   onError: (error: unknown) => E2
-): Promise<Result<T2, E2>> {
+): Promise<Result<Awaited<T2>, Awaited<E2>>> {
   return mapAsync(fromPromise(promise), onOk, onError)
 }
 
