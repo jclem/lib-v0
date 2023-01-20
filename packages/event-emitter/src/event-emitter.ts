@@ -8,7 +8,7 @@ type EventMap = {
 }
 
 /**
- * An object which calls listeners when events are dispatched.
+ * An object which calls listeners when events are emitted.
  *
  * @example
  * ```ts
@@ -17,7 +17,7 @@ type EventMap = {
  * const listener = (value: string) => console.log(value)
  * const f = new Foo()
  * const off = f.on('foo', listener)
- * f.dispatch('foo', ['a']) // logs 'a'
+ * f.emit('foo', ['a']) // logs 'a'
  * off()
  * ```
  */
@@ -30,7 +30,7 @@ export class EventEmitter<EM extends EventMap> {
    * Add a listener to an event.
    *
    * @param event The event to listen to.
-   * @param listener A function to call when the event is dispatched.
+   * @param listener A function to call when the event is emitted.
    * @returns A function to remove the listener.
    */
   on<K extends keyof EM>(
@@ -51,7 +51,7 @@ export class EventEmitter<EM extends EventMap> {
    * Add a listener to an event that will be called only once.
    *
    * @param event The event to listen to.
-   * @param listener A function to call when the event is dispatched.
+   * @param listener A function to call when the event is emitted.
    * @returns A function to remove the listener.
    */
   once<K extends keyof EM>(
@@ -83,12 +83,12 @@ export class EventEmitter<EM extends EventMap> {
   }
 
   /**
-   * Dispatch an event.
+   * Emit an event.
    *
-   * @param event The event to dispatch.
+   * @param event The event to emit.
    * @param args The arguments to pass to the listeners.
    */
-  dispatch<K extends keyof EM>(event: K, args: EM[K]): void {
+  emit<K extends keyof EM>(event: K, args: EM[K]): void {
     const eventListeners = this.#subscriptions[event]
     if (eventListeners) {
       // Copy the listeners to avoid concurrent modification (during callbacks).

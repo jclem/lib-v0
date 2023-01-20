@@ -8,7 +8,7 @@ describe('EventEmitter#on', () => {
     const emitter = new MyEmitter()
     const listener = jest.fn()
     emitter.on('myEvent', listener)
-    emitter.dispatch('myEvent', ['foo'])
+    emitter.emit('myEvent', ['foo'])
     expect(listener).toHaveBeenCalledWith('foo')
   })
 
@@ -17,7 +17,7 @@ describe('EventEmitter#on', () => {
     const listener = jest.fn()
     const off = emitter.on('myEvent', listener)
     off()
-    emitter.dispatch('myEvent', ['foo'])
+    emitter.emit('myEvent', ['foo'])
     expect(listener).not.toHaveBeenCalled()
   })
 })
@@ -27,8 +27,8 @@ describe('EventEmitter#once', () => {
     const emitter = new MyEmitter()
     const listener = jest.fn()
     emitter.once('myEvent', listener)
-    emitter.dispatch('myEvent', ['foo'])
-    emitter.dispatch('myEvent', ['bar'])
+    emitter.emit('myEvent', ['foo'])
+    emitter.emit('myEvent', ['bar'])
     expect(listener).toHaveBeenCalledTimes(1)
     expect(listener).toHaveBeenCalledWith('foo')
   })
@@ -38,7 +38,7 @@ describe('EventEmitter#once', () => {
     const listener = jest.fn()
     const off = emitter.once('myEvent', listener)
     off()
-    emitter.dispatch('myEvent', ['foo'])
+    emitter.emit('myEvent', ['foo'])
     expect(listener).not.toHaveBeenCalled()
   })
 })
@@ -49,7 +49,7 @@ describe('EventEmitter#off', () => {
     const listener = jest.fn()
     emitter.on('myEvent', listener)
     emitter.off('myEvent', listener)
-    emitter.dispatch('myEvent', ['foo'])
+    emitter.emit('myEvent', ['foo'])
     expect(listener).not.toHaveBeenCalled()
   })
 
@@ -58,37 +58,37 @@ describe('EventEmitter#off', () => {
     const listener = jest.fn()
     emitter.once('myEvent', listener)
     emitter.off('myEvent', listener)
-    emitter.dispatch('myEvent', ['foo'])
+    emitter.emit('myEvent', ['foo'])
     expect(listener).not.toHaveBeenCalled()
   })
 })
 
-describe('EventEmitter#dispatch', () => {
-  test('dispatches an event', () => {
+describe('EventEmitter#emit', () => {
+  test('emits an event', () => {
     const emitter = new MyEmitter()
     const listener = jest.fn()
     emitter.on('myEvent', listener)
-    emitter.dispatch('myEvent', ['foo'])
+    emitter.emit('myEvent', ['foo'])
     expect(listener).toHaveBeenCalledWith('foo')
   })
 
-  test('does not dispatch to concurrently-created "on" listeners', () => {
+  test('does not emit to concurrently-created "on" listeners', () => {
     const emitter = new MyEmitter()
     const listener = jest.fn()
     emitter.on('myEvent', () => {
       emitter.on('myEvent', listener)
     })
-    emitter.dispatch('myEvent', ['foo'])
+    emitter.emit('myEvent', ['foo'])
     expect(listener).not.toHaveBeenCalled()
   })
 
-  test('does not dispatch to concurrently-created "once" listeners', () => {
+  test('does not emit to concurrently-created "once" listeners', () => {
     const emitter = new MyEmitter()
     const listener = jest.fn()
     emitter.on('myEvent', () => {
       emitter.once('myEvent', listener)
     })
-    emitter.dispatch('myEvent', ['foo'])
+    emitter.emit('myEvent', ['foo'])
     expect(listener).not.toHaveBeenCalled()
   })
 })
