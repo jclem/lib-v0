@@ -82,3 +82,26 @@ export function assertInstance<T extends abstract new (...args: any) => any>(
 
   throw new Error(message)
 }
+
+/**
+ * Assert that `val1` is equal to `val2` via strict comparison.
+ *
+ * Note that `val2` is the value actually returned from this function, which is
+ * safe, because we know that `val1` is strictly equal to `val2`.
+ *
+ * @param val1 The value to assert on, of unknown type
+ * @param val2 The value to assert `val1` is equal to
+ * @param message An error message thrown when `val1` is not equal to `val2`
+ * @returns
+ */
+export function assertEquals<B>(
+  val1: unknown,
+  val2: B,
+  message = `Expected ${val1} to equal ${val2}`
+): B {
+  if (val1 === val2) {
+    return val2
+  }
+
+  throw new Error(message)
+}

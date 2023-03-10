@@ -1,5 +1,11 @@
 import {describe, expect, test} from '@jest/globals'
-import {assert, assertInstance, assertString, assertType} from '../src/assert'
+import {
+  assert,
+  assertEquals,
+  assertInstance,
+  assertString,
+  assertType
+} from '../src/assert'
 
 describe('assert', () => {
   test('passes with a value', () => {
@@ -66,5 +72,22 @@ describe('assertInstance', () => {
     expect(() => assertInstance(foo, Foo)).toThrow(
       'Expected a Foo, but got [object Object]'
     )
+  })
+})
+
+describe('assertEquals', () => {
+  test('passes with equal values', () => {
+    expect(assertEquals(1, 1)).toBe(1)
+  })
+
+  test('raises with non-equal values', () => {
+    expect(() => assertEquals(1, 2)).toThrow('Expected 1 to equal 2')
+  })
+
+  test('returns the type of the second input', () => {
+    const check = (input: 'a' | 'b') => input
+    const input = 'a'
+    const output = assertEquals(input, 'a')
+    check(output)
   })
 })
