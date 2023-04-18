@@ -6,6 +6,7 @@
   "bugs": "https://github.com/jclem/lib/issues",
   "type": "module",
   "types": "./dist/esm/assert.d.ts",
+  "main": "./dist/cjs/assert.js",
   "exports": {
     ".": {
       "types": "./dist/esm/assert.d.ts",
