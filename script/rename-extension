@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -eux
+set -o pipefail
+
+find "$1" -type f -iname "*.js" -exec bash -c \
+  'for arg; do mv "$arg" "${arg%.*}.$0"; done' "$2" {} +
+find "$1" -type f -iname "*.ts" -exec bash -c \
+  'for arg; do mv "$arg" "${arg%.*}.$0"; done' "$3" {} +

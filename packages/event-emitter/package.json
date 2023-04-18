@@ -11,9 +11,14 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/esm/event-emitter.js",
-      "require": "./dist/cjs/event-emitter.js",
-      "types": "./dist/esm/event-emitter.d.ts"
+      "import": {
+        "types": "./dist/esm/event-emitter.d.mts",
+        "default": "./dist/esm/event-emitter.mjs"
+      },
+      "require": {
+        "types": "./dist/esm/event-emitter.d.cts",
+        "default": "./dist/cjs/event-emitter.cjs"
+      }
     }
   },
   "files": [
@@ -46,8 +51,12 @@
   },
   "scripts": {
     "build": "if [ -d dist ]; then rm -r dist; fi && cp ../../LICENSE.md . && konk run c -gL -n'build:*'",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.json",
+    "build:cjs": "konk run s -L -n'cjs:*'",
+    "cjs:build": "tsc -p tsconfig.cjs.json",
+    "cjs:rename": "../../script/rename-extension dist/cjs cjs cts",
+    "build:esm": "konk run s -L -n'esm:*'",
+    "esm:build": "tsc -p tsconfig.json",
+    "esm:rename": "../../script/rename-extension dist/esm mjs mts",
     "check": "konk run c -cgL -n 'check:*'",
     "check:format": "prettier --check .",
     "check:lint": "eslint .",
@@ -55,7 +64,6 @@
     "fix:format": "prettier --list-different --write .",
     "test": "jest"
   },
-  "type": "module",
-  "types": "./dist/esm/event-emitter.d.ts",
+  "types": "./dist/esm/event-emitter.d.mts",
   "version": "2.0.0"
 }
