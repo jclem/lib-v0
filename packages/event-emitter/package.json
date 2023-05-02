@@ -1,6 +1,6 @@
 {
   "name": "@jclem/event-emitter",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "An event emitter implementation",
   "license": "MIT",
   "author": "Jonathan Clem <j@jclem.me> (https://www.jclem.me)",

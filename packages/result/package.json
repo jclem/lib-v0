@@ -1,6 +1,6 @@
 {
   "name": "@jclem/result",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Functions for working with result types",
   "license": "MIT",
   "author": "Jonathan Clem <j@jclem.me> (https://www.jclem.me)",
