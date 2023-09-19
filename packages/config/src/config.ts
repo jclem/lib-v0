@@ -27,11 +27,15 @@ export function newConfig<T extends ConfigType>(schema: T): Config<T> {
  */
 export type FileEntry = [path: string, parse: (contents: Buffer) => unknown]
 
+type ReadValue = {type: 'value'; value: Record<string, unknown>}
+type ReadFile = {type: 'file'; value: FileEntry}
+type ReadEnv = {type: 'env'}
+
+type ReadIn = ReadValue | ReadFile | ReadEnv
+
 class Config<T extends ConfigType> {
   private readonly schema: T
-  private readonly files: FileEntry[] = []
-  private readonly values: Record<string, unknown>[] = []
-  private readFromEnv = false
+  private reads: ReadIn[] = []
 
   constructor(schema: T) {
     this.schema = schema
@@ -48,7 +52,10 @@ class Config<T extends ConfigType> {
    * newConfig(schema).readValue({foo: 'bar'}, {baz: 'qux'}).parseSync()
    */
   readValue(...values: Record<string, unknown>[]): this {
-    this.values.push(...values)
+    for (const value of values) {
+      this.reads.push({type: 'value', value})
+    }
+
     return this
   }
 
@@ -75,11 +82,11 @@ class Config<T extends ConfigType> {
    * @param filePaths The paths to the config file(s) to read
    */
   readFile(...filePaths: (string | FileEntry)[]): this {
-    this.files.push(
-      ...filePaths.map<FileEntry>(p =>
-        isFileEntry(p) ? p : [p, this.parseFile]
-      )
-    )
+    for (const file of filePaths) {
+      const value: FileEntry = isFileEntry(file) ? file : [file, this.parseFile]
+      this.reads.push({type: 'file', value})
+    }
+
     return this
   }
 
@@ -87,13 +94,16 @@ class Config<T extends ConfigType> {
    * Read config values from environment variables.
    */
   readEnv(): this {
-    this.readFromEnv = true
+    this.reads.push({type: 'env'})
     return this
   }
 
   /**
    * Asynchronously parse the values, config files, and environment (if enabled)
    * into a configuration object matching the schema given to {@link newConfig}.
+   *
+   * @remarks
+   * - The inputs will be read in the order they were added to the config.
    *
    * @returns A promise that resolves to the parsed configuration object.
    */
@@ -109,7 +119,8 @@ class Config<T extends ConfigType> {
    * newConfig}.
    *
    * @remarks
-   * This calls `safeParseAsync` on the Zod schema.
+   * - The inputs will be read in the order they were added to the config.
+   * - This calls `safeParseAsync` on the Zod schema.
    *
    * @returns A promise that resolves to the parsed configuration object.
    */
@@ -123,6 +134,9 @@ class Config<T extends ConfigType> {
    * Synchronously parse the values, config files, and environment (if enabled)
    * into a configuration object matching the schema given to {@link newConfig}.
    *
+   * @remarks
+   * - The inputs will be read in the order they were added to the config.
+   *
    * @returns The parsed configuration object.
    */
   parse(): z.infer<T> {
@@ -134,9 +148,10 @@ class Config<T extends ConfigType> {
   /**
    * Synchronously parse the values, config files, and environment (if enabled)
    * into a configuration object matching the schema given to {@link newConfig}.
-
+   *
    * @remarks
-   * This calls `safeParse` on the Zod schema.
+   * - The inputs will be read in the order they were added to the config.
+   * - This calls `safeParse` on the Zod schema.
    *
    * @returns The parsed configuration object.
    */
@@ -147,49 +162,45 @@ class Config<T extends ConfigType> {
   }
 
   private async getInputAsync() {
-    return deepMerge(
-      this.readInValues(),
-      await this.readInFiles(),
-      this.readInEnv()
+    const resolvedReads = await Promise.all(
+      this.reads.map(async read => {
+        switch (read.type) {
+          case 'value':
+            return read.value
+          case 'file':
+            return new Promise<Record<string, unknown>>((resolve, reject) => {
+              readFile(read.value[0], (err, data) => {
+                err
+                  ? reject(err)
+                  : resolve(
+                      z.object({}).passthrough().parse(read.value[1](data))
+                    )
+              })
+            })
+          case 'env':
+            return this.readInEnv()
+        }
+      })
     )
+    return deepMerge(...resolvedReads)
   }
 
   private getInput() {
-    return deepMerge(
-      this.readInValues(),
-      this.readInFilesSync(),
-      this.readInEnv()
-    )
-  }
+    const resolvedReads = this.reads.map(read => {
+      switch (read.type) {
+        case 'value':
+          return read.value
+        case 'file':
+          return z
+            .object({})
+            .passthrough()
+            .parse(read.value[1](readFileSync(read.value[0])))
+        case 'env':
+          return this.readInEnv()
+      }
+    })
 
-  private readInValues() {
-    return deepMerge(...this.values)
-  }
-
-  private async readInFiles() {
-    const files = await Promise.all(
-      this.files.map(entry => {
-        return new Promise<Record<string, unknown>>((resolve, reject) => {
-          readFile(entry[0], (err, data) =>
-            err
-              ? reject(err)
-              : resolve(z.object({}).passthrough().parse(entry[1](data)))
-          )
-        })
-      })
-    )
-
-    return deepMerge(...files)
-  }
-
-  private readInFilesSync() {
-    const files = this.files.map(entry =>
-      z
-        .object({})
-        .passthrough()
-        .parse(entry[1](readFileSync(entry[0])))
-    )
-    return deepMerge(...files)
+    return deepMerge(...resolvedReads)
   }
 
   private parseFile(data: Buffer): Record<string, unknown> {
@@ -200,9 +211,7 @@ class Config<T extends ConfigType> {
   // environment variables. A value at the path `foo.bar.baz` should be read
   // from `FOO__BAR__BAZ`, and a value at the path `fooBar.baz` should be read
   // from `FOO_BAR__BAZ`.
-  private readInEnv() {
-    if (!this.readFromEnv) return {}
-
+  private readInEnv(): Record<string, unknown> {
     const readEnvValue = (path: string[]) => {
       const envVarName = path
         .map(p =>

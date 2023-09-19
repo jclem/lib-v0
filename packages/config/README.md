@@ -119,14 +119,9 @@ will have both values populated from the same environment variable,
 
 ### Configuration Source Precedence
 
-Config will read configuration input from the following sources in the following
-order:
-
-1. **Raw values**, overwritten by...
-2. **Configuration files**, overwritten by...
-3. **Environment variables**
-
-For example:
+Config will read configuration input in the order in which there were added to
+the config, with later sources taking precedence over earlier sources. For
+example:
 
 ```typescript
 import {newConfig} from '@jclem/config'
@@ -154,6 +149,3 @@ console.log(config.a) // a
 console.log(config.b) // b from file
 console.log(config.c) // c from env
 ```
-
-Note that the order in which `readValue`, `readFile`, and `readEnv` are called
-does not matter.
