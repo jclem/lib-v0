@@ -170,7 +170,7 @@ class Config<T extends ConfigType> {
     const readEnv = (path: string[], schema: object) => {
       if (isTypeBoxObject(schema)) {
         for (const key in schema.properties) {
-          readEnv([...path, key], schema.shape[key])
+          readEnv([...path, key], schema.properties[key])
         }
       } else {
         const value = readEnvValue(path)

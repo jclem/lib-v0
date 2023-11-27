@@ -35,6 +35,23 @@ describe('TypeBox', () => {
     expect(config.number).toEqual(1)
     expect(config.object).toEqual({a: 'a', b: 'b'})
   })
+
+  test('reads from the environment', () => {
+    process.env['FOO'] = 'bar'
+
+    const config = newConfigTypeBox(Type.Object({foo: Type.String()}))
+      .readEnv()
+      .parse()
+    expect(config.foo).toEqual('bar')
+
+    process.env['FOO__BAR'] = 'baz'
+    const nestedConfig = newConfigTypeBox(
+      Type.Object({foo: Type.Object({bar: Type.String()})})
+    )
+      .readEnv()
+      .parse()
+    expect(nestedConfig.foo.bar).toEqual('baz')
+  })
 })
 
 test('parses a basic config file', () => {
