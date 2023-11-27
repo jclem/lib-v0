@@ -1,16 +1,17 @@
-import {readFile, readFileSync} from 'node:fs'
-import type * as z from 'zod'
+import type * as t from '@sinclair/typebox'
+import * as v from '@sinclair/typebox/value'
+import {readFileSync} from 'node:fs'
 
-/** A {@link z.ZodObject} definition used to define config */
-export type ConfigType = z.ZodObject<z.ZodRawShape>
+/** A {@link t.TObject} definition used to define config */
+export type ConfigType = t.TObject<t.TProperties>
 
 /**
  * Create a new {@link Config} instance for a given {@link ConfigType}.
  *
  * @example
  * ```ts
- * const config = newConfig(z.object({
- *   foo: z.string()
+ * const config = newConfig(Type.Object({
+ *   foo: Type.String()
  * }))
  *  .readEnv()
  *  .parse()
@@ -99,37 +100,6 @@ class Config<T extends ConfigType> {
   }
 
   /**
-   * Asynchronously parse the values, config files, and environment (if enabled)
-   * into a configuration object matching the schema given to {@link newConfig}.
-   *
-   * @remarks
-   * - The inputs will be read in the order they were added to the config.
-   *
-   * @returns A promise that resolves to the parsed configuration object.
-   */
-  async parseAsync(): Promise<z.infer<T>> {
-    const input = await this.getInputAsync()
-    return this.schema.parseAsync(input)
-  }
-
-  /**
-   * Asynchronously safely parse the values, config files, and environment (if
-   * enabled) into a configuration object matching the schema given to {@link
-   * newConfig}.
-   *
-   * @remarks
-   * - The inputs will be read in the order they were added to the config.
-   * - This calls `safeParseAsync` on the Zod schema.
-   *
-   * @returns A promise that resolves to the parsed configuration object.
-   */
-  async safeParseAsync(): Promise<z.SafeParseReturnType<unknown, z.infer<T>>> {
-    const input = await this.getInputAsync()
-    const result = await this.schema.safeParseAsync(input)
-    return result
-  }
-
-  /**
    * Synchronously parse the values, config files, and environment (if enabled)
    * into a configuration object matching the schema given to {@link newConfig}.
    *
@@ -138,64 +108,9 @@ class Config<T extends ConfigType> {
    *
    * @returns The parsed configuration object.
    */
-  parse(): z.infer<T> {
+  parse(): t.Static<T> {
     const input = this.getInput()
-    return this.schema.parse(input)
-  }
-
-  /**
-   * Synchronously parse the values, config files, and environment (if enabled)
-   * into a configuration object matching the schema given to {@link newConfig}.
-   *
-   * @remarks
-   * - The inputs will be read in the order they were added to the config.
-   * - This calls `safeParse` on the Zod schema.
-   *
-   * @returns The parsed configuration object.
-   */
-  safeParse(): z.SafeParseReturnType<unknown, z.infer<T>> {
-    const input = this.getInput()
-    const output = this.schema.safeParse(input)
-    return output
-  }
-
-  private async getInputAsync() {
-    const resolvedReads = await Promise.all(
-      this.reads.map(async read => {
-        switch (read.type) {
-          case 'value':
-            return read.value
-          case 'file':
-            return new Promise<Record<string, unknown>>((resolve, reject) => {
-              const [path, parse] = read.value
-
-              readFile(path, (err, data) => {
-                if (err != null) {
-                  reject(err)
-                  return
-                }
-
-                const readData = parse(data)
-
-                if (!isRecord(readData)) {
-                  reject(
-                    new Error(
-                      `Expected ${path} to parse to a record with string keys, but it parsed to a ${typeof readData}`
-                    )
-                  )
-                  return
-                }
-
-                resolve(readData)
-              })
-            })
-          case 'env':
-            return this.readInEnv()
-        }
-      })
-    )
-
-    return deepMerge(...resolvedReads)
+    return v.Value.Decode(this.schema, input)
   }
 
   private getInput() {
@@ -253,8 +168,8 @@ class Config<T extends ConfigType> {
     const input: Record<string, unknown> = {}
 
     const readEnv = (path: string[], schema: object) => {
-      if (isZodObject(schema)) {
-        for (const key in schema.shape) {
+      if (isTypeBoxObject(schema)) {
+        for (const key in schema.properties) {
           readEnv([...path, key], schema.shape[key])
         }
       } else {
@@ -283,8 +198,8 @@ class Config<T extends ConfigType> {
   }
 }
 
-function isZodObject(value: object): value is z.ZodObject<z.ZodRawShape> {
-  return Reflect.has(value, 'shape')
+function isTypeBoxObject(value: object): value is t.TObject<t.TProperties> {
+  return Reflect.has(value, 'properties')
 }
 
 function deepMerge(...objects: Record<string, unknown>[]) {
