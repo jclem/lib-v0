@@ -1,9 +1,7 @@
-import {describe, expect, test} from '@jest/globals'
-import {Type} from '@sinclair/typebox'
+import {expect, test} from '@jest/globals'
 import {load} from 'js-yaml'
 import z from 'zod'
 import {newConfig} from '../src/config'
-import {newConfig as newConfigTypeBox} from '../src/typebox/config'
 
 const BasicConfig = z.object({
   string: z.string(),
@@ -12,45 +10,6 @@ const BasicConfig = z.object({
     a: z.string().optional(),
     b: z.string().optional(),
     c: z.string().optional()
-  })
-})
-
-const BasicConfigTypebox = Type.Object({
-  string: Type.String(),
-  number: Type.Number(),
-  object: Type.Object({
-    a: Type.Optional(Type.String()),
-    b: Type.Optional(Type.String()),
-    c: Type.Optional(Type.String())
-  })
-})
-
-describe('TypeBox', () => {
-  test('works with TypeBox', () => {
-    const config = newConfigTypeBox(BasicConfigTypebox)
-      .readFile('fixtures/config1.json')
-      .parse()
-
-    expect(config.string).toEqual('string')
-    expect(config.number).toEqual(1)
-    expect(config.object).toEqual({a: 'a', b: 'b'})
-  })
-
-  test('reads from the environment', () => {
-    process.env['FOO'] = 'bar'
-
-    const config = newConfigTypeBox(Type.Object({foo: Type.String()}))
-      .readEnv()
-      .parse()
-    expect(config.foo).toEqual('bar')
-
-    process.env['FOO__BAR'] = 'baz'
-    const nestedConfig = newConfigTypeBox(
-      Type.Object({foo: Type.Object({bar: Type.String()})})
-    )
-      .readEnv()
-      .parse()
-    expect(nestedConfig.foo.bar).toEqual('baz')
   })
 })
 

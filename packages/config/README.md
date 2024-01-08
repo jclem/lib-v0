@@ -39,28 +39,6 @@ console.log(config.database.url) // mysql://localhost:3306/mydb
 console.log(config.database.poolSize) // 10
 ```
 
-TypeBox is also supported, but `@sinclair/typebox` must be installed (it's a
-peer dependency). Only `parse()` is supported, not `safeParse()`,
-`parseAsync()`, or `safeParseAsync()`.
-
-```typescript
-import {newConfig} from '@jclem/config/typebox'
-import {Type} from '@sinclair/typebox'
-
-process.env['DATABASE__URL'] = 'mysql://localhost:3306/mydb'
-
-// Define a configuration schema using TypeBox.
-const Config = Type.Object({
-  database: Type.Object({
-    url: Type.String()
-  })
-})
-
-export const config = newSchema(Config).readEnv().parse()
-
-console.log(config.database.url) // mysql://localhost:3306/mydb
-```
-
 ### Reading Configuration Input
 
 #### Reading a Raw Value

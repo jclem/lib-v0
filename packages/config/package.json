@@ -22,16 +22,6 @@
         "types": "./dist/cjs/config.d.cts",
         "default": "./dist/cjs/config.cjs"
       }
-    },
-    "./typebox": {
-      "import": {
-        "types": "./dist/esm/typebox/config.d.mts",
-        "default": "./dist/esm/typebox/config.mjs"
-      },
-      "require": {
-        "types": "./dist/cjs/typebox/config.d.cts",
-        "default": "./dist/cjs/typebox/config.cjs"
-      }
     }
   },
   "files": [
@@ -78,8 +68,5 @@
         "@swc/jest"
       ]
     }
-  },
-  "peerDependencies": {
-    "@sinclair/typebox": "^0.31.28"
   }
 }
