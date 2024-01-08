@@ -280,7 +280,6 @@ class Config<T extends ConfigType> {
     }
 
     readEnv([], this.schema)
-    console.log('input', input)
 
     return input
   }
