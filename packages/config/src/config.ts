@@ -1,5 +1,5 @@
 import {readFile, readFileSync} from 'node:fs'
-import type * as z from 'zod'
+import * as z from 'zod'
 
 /** A {@link z.ZodObject} definition used to define config */
 export type ConfigType = z.ZodObject<z.ZodRawShape>
@@ -257,6 +257,8 @@ class Config<T extends ConfigType> {
         for (const key in schema.shape) {
           readEnv([...path, key], schema.shape[key])
         }
+      } else if (isZodDefault(schema)) {
+        readEnv(path, schema._def.innerType)
       } else {
         const value = readEnvValue(path)
 
@@ -278,13 +280,18 @@ class Config<T extends ConfigType> {
     }
 
     readEnv([], this.schema)
+    console.log('input', input)
 
     return input
   }
 }
 
 function isZodObject(value: object): value is z.ZodObject<z.ZodRawShape> {
-  return Reflect.has(value, 'shape')
+  return value instanceof z.ZodObject
+}
+
+function isZodDefault(value: object): value is z.ZodDefault<z.ZodTypeAny> {
+  return value instanceof z.ZodDefault
 }
 
 function deepMerge(...objects: Record<string, unknown>[]) {

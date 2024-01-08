@@ -1,4 +1,4 @@
-import {expect, test} from '@jest/globals'
+import {describe, expect, test} from '@jest/globals'
 import {load} from 'js-yaml'
 import z from 'zod'
 import {newConfig} from '../src/config'
@@ -163,4 +163,65 @@ test('parses safely with an error', () => {
       ])
     )
   }
+})
+
+describe('objects', () => {
+  test('handles basic objects', () => {
+    const Config = z.object({
+      log: z.object({
+        level: z.enum(['info', 'warn']),
+        format: z.enum(['json', 'pretty'])
+      })
+    })
+    const config = newConfig(Config)
+      .readValue({log: {level: 'info', format: 'pretty'}})
+      .parse()
+    expect(config.log.level).toEqual('info')
+    expect(config.log.format).toEqual('pretty')
+  })
+
+  test('handles default object keys', () => {
+    const Config = z.object({
+      log: z
+        .object({
+          format: z.enum(['json', 'pretty']).default('pretty'),
+          level: z.enum(['info', 'warn']).default('info')
+        })
+        .default({})
+    })
+
+    let config = newConfig(Config).readValue({}).parse()
+    expect(config.log.level).toEqual('info')
+    expect(config.log.format).toEqual('pretty')
+
+    config = newConfig(Config)
+      .readValue({log: {format: 'json'}})
+      .parse()
+
+    expect(config.log.level).toEqual('info')
+    expect(config.log.format).toEqual('json')
+  })
+
+  test('handles default object keys from environment', () => {
+    const Config = z.object({
+      log: z
+        .object({
+          format: z.enum(['json', 'pretty']).default('pretty'),
+          level: z.enum(['info', 'warn']).default('info')
+        })
+        .default({})
+    })
+
+    delete process.env.LOG__FORMAT
+    delete process.env.LOG__LEVEL
+
+    let config = newConfig(Config).readEnv().parse()
+    expect(config.log.level).toEqual('info')
+    expect(config.log.format).toEqual('pretty')
+
+    process.env.LOG__FORMAT = 'json'
+    config = newConfig(Config).readEnv().parse()
+    expect(config.log.level).toEqual('info')
+    expect(config.log.format).toEqual('json')
+  })
 })
